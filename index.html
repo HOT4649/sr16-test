@@ -298,7 +298,7 @@
         </div>
         <div class="download-section">
             <p style="margin-top:0; font-size:14px; color:#27ae60; font-weight:bold;">診断結果をPDFとして保存できます</p>
-            <button type="button" class="download-btn" onclick="downloadResultPDF()">診断結果PDFをダウンロード</button>
+            <button type="button" class="download-btn" id="btn-pdf" onclick="downloadResultPDF()">診断結果PDFをダウンロード</button>
         </div>
     </div>
 </div>
@@ -431,7 +431,7 @@
         document.getElementById('average-score').innerText = avg;
         document.getElementById('answer-datetime').innerText = `回答日時：${showDateTime()}`;
 
-        // ★ 再計算時は画像フォールバックを隠し、Canvasを表示する状態に戻す
+        // 再計算時は画像フォールバックを隠し、Canvasを表示する状態に戻す
         document.getElementById('radarChart1').style.display = 'block';
         document.getElementById('radarChart2').style.display = 'block';
         document.getElementById('radarChart3').style.display = 'block';
@@ -445,7 +445,7 @@
         if (chart2) chart2.destroy();
         if (chart3) chart3.destroy();
 
-        // ★ 【中心を0、最大を6に完全固定する設定】
+        // 【中心を0、最大を6に完全固定する設定】
         const gridScaleOptions = {
             min: 0,
             max: 6,
@@ -582,8 +582,12 @@
         document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // PDFダウンロード生成：Canvasの白紙化バグを完全に防ぐ同期関数
-    function downloadResultPDF() {
+    // PDFダウンロード生成：非同期の読み込み完了を確実に待つように改善
+    async function downloadResultPDF() {
+        const btn = document.getElementById('btn-pdf');
+        btn.innerText = "PDF生成中...";
+        btn.disabled = true;
+
         const c1 = document.getElementById('radarChart1');
         const c2 = document.getElementById('radarChart2');
         const c3 = document.getElementById('radarChart3');
@@ -592,10 +596,20 @@
         const img2 = document.getElementById('chart2-img');
         const img3 = document.getElementById('chart3-img');
 
-        // ★重要: Canvasの内容を画像データ(Base64)に変換してimg要素にセット
-        img1.src = c1.toDataURL('image/png');
-        img2.src = c2.toDataURL('image/png');
-        img3.src = c3.toDataURL('image/png');
+        // 各画像タグが完全にBase64データをロードしたか判定するためのPromise関数
+        const loadImage = (imgElement, canvasElement) => {
+            return new Promise((resolve) => {
+                imgElement.onload = () => resolve();
+                imgElement.src = canvasElement.toDataURL('image/png');
+            });
+        };
+
+        // 3つの画像がブラウザに完全にロードされるのを同期的に待つ
+        await Promise.all([
+            loadImage(img1, c1),
+            loadImage(img2, c2),
+            loadImage(img3, c3)
+        ]);
 
         // 表示のオンオフを切り替え（PDFライブラリに確実に画像として認識させる）
         c1.style.display = 'none';
@@ -612,11 +626,11 @@
             margin:       10,
             filename:     '心理評価テスト_診断結果.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, logging: false }, 
+            html2canvas:  { scale: 2, useCORS: true, logging: false, delay: 300 }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // PDF生成完了後にCanvas表示に戻すためのコールバック
+        // PDF生成を実行
         html2pdf().set(opt).from(element).save().then(() => {
             // PDF出力が終わったら元の画面表示（インタラクティブなCanvas）に戻す
             c1.style.display = 'block';
@@ -626,6 +640,9 @@
             img1.style.display = 'none';
             img2.style.display = 'none';
             img3.style.display = 'none';
+
+            btn.innerText = "診断結果PDFをダウンロード";
+            btn.disabled = false;
         });
     }
 </script>

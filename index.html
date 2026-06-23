@@ -137,7 +137,7 @@
             background-color: #fcfcfc;
             border: 1px solid #e6e9ed;
             border-radius: 8px;
-            page-break-inside: avoid; /* PDF化の際のページ途中切れ防止 */
+            page-break-inside: avoid;
         }
         .chart-title {
             text-align: center;
@@ -151,6 +151,13 @@
             margin: auto;
             height: 380px;
             width: 100%;
+        }
+        /* PDF化の際に一時的に差し替えるためのコンテナ画像スタイル */
+        .chart-img-fallback {
+            display: none;
+            max-width: 100%;
+            height: auto;
+            margin: auto;
         }
         .color-legend {
             margin-top: 15px;
@@ -225,15 +232,17 @@
 
             <div class="chart-block">
                 <div class="chart-title">チャート①：標準順（SR1 ～ SR16）</div>
-                <div class="chart-container">
+                <div class="chart-container" id="container1">
                     <canvas id="radarChart1"></canvas>
+                    <img id="chart1-img" class="chart-img-fallback" alt="Chart 1">
                 </div>
             </div>
 
             <div class="chart-block">
                 <div class="chart-title">チャート②：分類別配置（時計回り・同色線繋ぎ）</div>
-                <div class="chart-container">
+                <div class="chart-container" id="container2">
                     <canvas id="radarChart2"></canvas>
+                    <img id="chart2-img" class="chart-img-fallback" alt="Chart 2">
                 </div>
                 <div class="color-legend">
                     <div style="font-weight: bold; margin-bottom: 8px;">【チャート②：色の説明】</div>
@@ -262,8 +271,9 @@
 
             <div class="chart-block">
                 <div class="chart-title">チャート③：NISHI改分類配置</div>
-                <div class="chart-container">
+                <div class="chart-container" id="container3">
                     <canvas id="radarChart3"></canvas>
+                    <img id="chart3-img" class="chart-img-fallback" alt="Chart 3">
                 </div>
                 <div class="color-legend">
                     <div style="font-weight: bold; margin-bottom: 8px;">【チャート③：色の説明】</div>
@@ -301,7 +311,7 @@
         "SR3. つらい状況に陥ったときに、再び幸せな生活を取り戻すにはどうすればよいか心得ている",
         "SR4. ある人（たち）との関係が自分にとって良くない場合、それが満足できる関係になるまで様々な工夫や取り組みを行う",
         "SR5. 仕事、趣味、余暇、食事、パートナー関係など、生活の様々な要素をうまく調節しながら幸せに暮らせている",
-        "SR6. プレッシャーのかかる状況におかれた場合、いつも最終的には無事に乗り切れるような行動をとる",
+        "SR6. プレッシャーのかかる状況におかれた場合、いつも最終的には無さに乗り切れるような行動をとる",
         "SR7. 大切な目標を掲げた場合は、いつも自分の力でこれを達成することができる",
         "SR8. やりたいことができるような状況を、自分で作り出せているので、充実感とともに暮らしている",
         "SR9. 自分の行動が失敗を招いた場合、それは諦めではなく、むしろ新しいやり方を見つけ出すきっかけとなる",
@@ -323,7 +333,6 @@
         { text: "1. まったく 当てはまらない", value: 1 }
     ];
 
-    // --- チャート②用の設定 ---
     const chart2Order = [1, 14, 15, 2, 7, 8, 16, 3, 6, 9, 12, 4, 13, 5, 10, 11];
     
     function getColorForChart2(srNumber) {
@@ -335,7 +344,6 @@
         return '#7f8c8d';
     }
 
-    // --- チャート③用の設定（NISHI改分類配置） ---
     const chart3Order = [10, 6, 1, 7, 2, 3, 4, 9, 11, 12, 5, 13, 8, 16, 15, 14];
     
     function getColorForChart3(srNumber) {
@@ -346,7 +354,7 @@
         return '#7f8c8d';
     }
 
-    // 質問フォームの動的生成
+    // 質問フォーム生成
     const container = document.getElementById('questions-container');
     questions.forEach((q, qIndex) => {
         const qBlock = document.createElement('div');
@@ -386,7 +394,6 @@
     let chart2 = null;
     let chart3 = null;
 
-    // 回答日時の自動取得・表示
     function showDateTime() {
         const now = new Date();
         const year = now.getFullYear();
@@ -396,7 +403,6 @@
         const day = dayList[now.getDay()];
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
-        
         return `${year}年${month}月${date}日(${day}) ${hours}時${minutes}分`;
     }
 
@@ -421,21 +427,28 @@
             total += selectedValue;
         }
 
-        // 平均表示 & 日時セット
         const avg = (total / questions.length).toFixed(2);
         document.getElementById('average-score').innerText = avg;
         document.getElementById('answer-datetime').innerText = `回答日時：${showDateTime()}`;
+
+        // ★ 再計算時は画像フォールバックを隠し、Canvasを表示する状態に戻す
+        document.getElementById('radarChart1').style.display = 'block';
+        document.getElementById('radarChart2').style.display = 'block';
+        document.getElementById('radarChart3').style.display = 'block';
+        document.getElementById('chart1-img').style.display = 'none';
+        document.getElementById('chart2-img').style.display = 'none';
+        document.getElementById('chart3-img').style.display = 'none';
+
         document.getElementById('result-section').style.display = 'block';
 
-        // 既存グラフのクリア
         if (chart1) chart1.destroy();
         if (chart2) chart2.destroy();
         if (chart3) chart3.destroy();
 
-        // 共通：太く見やすいグリッド設定
+        // ★ 【中心を0、最大を6に完全固定する設定】
         const gridScaleOptions = {
-            suggestedMin: 1,
-            suggestedMax: 6,
+            min: 0,
+            max: 6,
             ticks: { 
                 stepSize: 1,
                 font: { size: 11, weight: 'bold' }
@@ -450,7 +463,7 @@
             }
         };
 
-        // --- チャート①：標準順 ---
+        // --- チャート① ---
         const ctx1 = document.getElementById('radarChart1').getContext('2d');
         chart1 = new Chart(ctx1, {
             type: 'radar',
@@ -467,14 +480,14 @@
                 }]
             },
             options: {
-                animation: false, // ★PDF化の白紙バグ対策
+                animation: false,
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: { r: gridScaleOptions }
             }
         });
 
-        // --- チャート②：分類別配置（同じ色のみ線で繋ぐ） ---
+        // --- チャート② ---
         const ctx2 = document.getElementById('radarChart2').getContext('2d');
         const chart2Labels = chart2Order.map(num => `SR${num}`);
         const chart2Colors = chart2Order.map(num => getColorForChart2(num));
@@ -521,7 +534,7 @@
                 datasets: chart2Datasets
             },
             options: {
-                animation: false, // ★PDF化の白紙バグ対策
+                animation: false,
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } }, 
@@ -529,7 +542,7 @@
             }
         });
 
-        // --- チャート③：NISHI改分類配置（点は線で繋がない） ---
+        // --- チャート③ ---
         const ctx3 = document.getElementById('radarChart3').getContext('2d');
         const chart3Labels = chart3Order.map(num => `SR${num}`);
         const chart3Scores = chart3Order.map(num => baseScores[num - 1]);
@@ -559,7 +572,7 @@
                 }]
             },
             options: {
-                animation: false, // ★PDF化の白紙バグ対策
+                animation: false,
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: { r: chart3ScaleOptions }
@@ -569,8 +582,30 @@
         document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // PDFダウンロード生成用の処理関数
+    // PDFダウンロード生成：Canvasの白紙化バグを完全に防ぐ同期関数
     function downloadResultPDF() {
+        const c1 = document.getElementById('radarChart1');
+        const c2 = document.getElementById('radarChart2');
+        const c3 = document.getElementById('radarChart3');
+
+        const img1 = document.getElementById('chart1-img');
+        const img2 = document.getElementById('chart2-img');
+        const img3 = document.getElementById('chart3-img');
+
+        // ★重要: Canvasの内容を画像データ(Base64)に変換してimg要素にセット
+        img1.src = c1.toDataURL('image/png');
+        img2.src = c2.toDataURL('image/png');
+        img3.src = c3.toDataURL('image/png');
+
+        // 表示のオンオフを切り替え（PDFライブラリに確実に画像として認識させる）
+        c1.style.display = 'none';
+        c2.style.display = 'none';
+        c3.style.display = 'none';
+
+        img1.style.display = 'block';
+        img2.style.display = 'block';
+        img3.style.display = 'block';
+
         const element = document.getElementById('pdf-content');
         
         const opt = {
@@ -581,7 +616,17 @@
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().set(opt).from(element).save();
+        // PDF生成完了後にCanvas表示に戻すためのコールバック
+        html2pdf().set(opt).from(element).save().then(() => {
+            // PDF出力が終わったら元の画面表示（インタラクティブなCanvas）に戻す
+            c1.style.display = 'block';
+            c2.style.display = 'block';
+            c3.style.display = 'block';
+
+            img1.style.display = 'none';
+            img2.style.display = 'none';
+            img3.style.display = 'none';
+        });
     }
 </script>
 

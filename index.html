@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>【SR 16】心理評価テスト</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -12,12 +11,11 @@
             color: #333333;
             margin: 0;
             padding: 20px;
-            /* html2pdfのバグを回避するため、bodyでのdisplay: flexを廃止 */
         }
         .container {
             max-width: 700px;
             width: 100%;
-            margin: 0 auto; /* display: flexの代わりにmarginで中央寄せを実現 */
+            margin: 0 auto;
             background-color: #ffffff;
             padding: 30px;
             border-radius: 12px;
@@ -51,10 +49,10 @@
             line-height: 1.5;
         }
         .options {
-            display: block; /* Flexboxを避けるためblockに修正 */
+            display: block;
         }
         .option-label {
-            display: block; /* flexからblockへ変更し、内部の配置を調整 */
+            display: block;
             padding: 10px;
             border: 1px solid #dcdde1;
             border-radius: 6px;
@@ -101,8 +99,7 @@
             border-top: 2px solid #e1e8ed;
             padding-top: 30px;
         }
-        /* PDF出力エリアの設定 */
-        #pdf-content {
+        #result-content {
             background-color: #ffffff;
             padding: 20px;
         }
@@ -137,7 +134,6 @@
             background-color: #fcfcfc;
             border: 1px solid #e6e9ed;
             border-radius: 8px;
-            page-break-inside: avoid;
         }
         .chart-title {
             text-align: center;
@@ -152,13 +148,6 @@
             height: 380px;
             width: 100%;
         }
-        /* PDF化の際に一時的に差し替えるためのコンテナ画像スタイル */
-        .chart-img-fallback {
-            display: none;
-            max-width: 100%;
-            height: auto;
-            margin: 0 auto;
-        }
         .color-legend {
             margin-top: 15px;
             padding: 12px;
@@ -169,13 +158,13 @@
         }
         .legend-item {
             margin-bottom: 8px;
-            overflow: hidden; /* flexの代用としての回り込み解除 */
+            overflow: hidden;
         }
         .legend-item:last-child {
             margin-bottom: 0;
         }
         .color-box {
-            float: left; /* flexを避けるためfloatに変更 */
+            float: left;
             width: 30px;
             height: 16px;
             margin-right: 10px;
@@ -185,29 +174,6 @@
         .legend-text {
             display: block;
             margin-left: 40px;
-        }
-        .download-section {
-            background-color: #eafaf1;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 30px;
-            border: 1px solid #2ecc71;
-            text-align: center;
-        }
-        .download-btn {
-            width: 100%;
-            padding: 15px;
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .download-btn:hover {
-            background-color: #27ae60;
         }
     </style>
 </head>
@@ -223,7 +189,7 @@
     </form>
 
     <div id="result-section">
-        <div id="pdf-content">
+        <div id="result-content">
             <h2 class="result-title">診断結果</h2>
             <div class="datetime-box" id="answer-datetime"></div>
 
@@ -235,17 +201,15 @@
 
             <div class="chart-block">
                 <div class="chart-title">チャート①：標準順（SR1 ～ SR16）</div>
-                <div class="chart-container" id="container1">
+                <div class="chart-container">
                     <canvas id="radarChart1"></canvas>
-                    <img id="chart1-img" class="chart-img-fallback" alt="Chart 1">
                 </div>
             </div>
 
             <div class="chart-block">
                 <div class="chart-title">チャート②：分類別配置（時計回り・同色線繋ぎ）</div>
-                <div class="chart-container" id="container2">
+                <div class="chart-container">
                     <canvas id="radarChart2"></canvas>
-                    <img id="chart2-img" class="chart-img-fallback" alt="Chart 2">
                 </div>
                 <div class="color-legend">
                     <div style="font-weight: bold; margin-bottom: 8px;">【チャート②：色の説明】</div>
@@ -274,9 +238,8 @@
 
             <div class="chart-block">
                 <div class="chart-title">チャート③：NISHI改分類配置</div>
-                <div class="chart-container" id="container3">
+                <div class="chart-container">
                     <canvas id="radarChart3"></canvas>
-                    <img id="chart3-img" class="chart-img-fallback" alt="Chart 3">
                 </div>
                 <div class="color-legend">
                     <div style="font-weight: bold; margin-bottom: 8px;">【チャート③：色の説明】</div>
@@ -299,15 +262,10 @@
                 </div>
             </div>
         </div>
-        <div class="download-section">
-            <p style="margin-top:0; font-size:14px; color:#27ae60; font-weight:bold;">診断結果をPDFとして保存できます</p>
-            <button type="button" class="download-btn" id="btn-pdf" onclick="downloadResultPDF()">診断結果PDFをダウンロード</button>
-        </div>
     </div>
 </div>
 
 <script>
-    // 16の質問データ
     const questions = [
         "SR1. 活力が湧き、人生に前向きになるような状態に、いつでも自力で到達することができる",
         "SR2. 大切な願いを実現し、やりたいことを実行するにはどうすればよいかを心得ている",
@@ -433,14 +391,6 @@
         const avg = (total / questions.length).toFixed(2);
         document.getElementById('average-score').innerText = avg;
         document.getElementById('answer-datetime').innerText = `回答日時：${showDateTime()}`;
-
-        // Canvasを表示状態にリセット
-        document.getElementById('radarChart1').style.display = 'block';
-        document.getElementById('radarChart2').style.display = 'block';
-        document.getElementById('radarChart3').style.display = 'block';
-        document.getElementById('chart1-img').style.display = 'none';
-        document.getElementById('chart2-img').style.display = 'none';
-        document.getElementById('chart3-img').style.display = 'none';
 
         document.getElementById('result-section').style.display = 'block';
 
@@ -582,90 +532,6 @@
         });
 
         document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // PDFダウンロード生成
-    async function downloadResultPDF() {
-        const btn = document.getElementById('btn-pdf');
-        btn.innerText = "PDF生成中...";
-        btn.disabled = true;
-
-        const c1 = document.getElementById('radarChart1');
-        const c2 = document.getElementById('radarChart2');
-        const c3 = document.getElementById('radarChart3');
-
-        const img1 = document.getElementById('chart1-img');
-        const img2 = document.getElementById('chart2-img');
-        const img3 = document.getElementById('chart3-img');
-
-        // 1. 画像の読み込み完了を確実に待つプロミス
-        const loadImage = (imgElement, canvasElement) => {
-            return new Promise((resolve, reject) => {
-                imgElement.onload = () => resolve();
-                imgElement.onerror = (e) => reject(e);
-                try {
-                    imgElement.src = canvasElement.toDataURL('image/png');
-                } catch(e) {
-                    reject(e);
-                }
-            });
-        };
-
-        try {
-            // 2. Canvasのデータを画像要素にコピー
-            await Promise.all([
-                loadImage(img1, c1),
-                loadImage(img2, c2),
-                loadImage(img3, c3)
-            ]);
-
-            // 3. 表示のオンオフ切り替え（html2pdfにキャプチャさせるため一時画像表示）
-            c1.style.display = 'none';
-            c2.style.display = 'none';
-            c3.style.display = 'none';
-
-            img1.style.display = 'block';
-            img2.style.display = 'block';
-            img3.style.display = 'block';
-
-            // レンダリング安定化のためのディレイ
-            await new Promise(resolve => setTimeout(resolve, 300));
-
-            const element = document.getElementById('pdf-content');
-            
-            const opt = {
-                margin:       [10, 15, 10, 15],
-                filename:     '心理評価テスト_診断結果.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { 
-                    scale: 2, 
-                    useCORS: true, 
-                    logging: false, 
-                    delay: 500, // html2canvas内部の待機時間を少し長めに
-                    backgroundColor: '#ffffff'
-                }, 
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            // 4. html2pdf.jsを正しくawaitで実行し完了を待つ
-            await html2pdf().set(opt).from(element).save();
-
-        } catch (err) {
-            console.error(err);
-            alert("PDF生成中にエラーが発生しました。");
-        } finally {
-            // 5. 必ず元の画面表示（グラフ表示）に戻す
-            c1.style.display = 'block';
-            c2.style.display = 'block';
-            c3.style.display = 'block';
-
-            img1.style.display = 'none';
-            img2.style.display = 'none';
-            img3.style.display = 'none';
-
-            btn.innerText = "診断結果PDFをダウンロード";
-            btn.disabled = false;
-        }
     }
 </script>
 

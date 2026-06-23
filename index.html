@@ -104,7 +104,14 @@
             text-align: center;
             color: #2c3e50;
             font-size: 22px;
+            margin-bottom: 10px;
+        }
+        .datetime-box {
+            text-align: center;
+            font-size: 14px;
+            color: #555555;
             margin-bottom: 20px;
+            font-weight: bold;
         }
         .score-box {
             text-align: center;
@@ -138,6 +145,64 @@
             height: 380px;
             width: 100%;
         }
+        .color-legend {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #ffffff;
+            border: 1px dashed #ccc;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+        .color-box {
+            width: 30px;
+            height: 16px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        .email-section {
+            background-color: #f1f2f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border: 1px solid #dcdde1;
+        }
+        .email-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .email-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+        }
+        .email-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .email-btn:hover {
+            background-color: #27ae60;
+        }
     </style>
 </head>
 <body>
@@ -153,6 +218,8 @@
 
     <div id="result-section">
         <h2 class="result-title">診断結果</h2>
+        <div class="datetime-box" id="answer-datetime"></div>
+
         <div class="score-box">
             <div>全体の平均点</div>
             <div class="score-value" id="average-score">0.0</div>
@@ -167,10 +234,42 @@
         </div>
 
         <div class="chart-block">
-            <div class="chart-title">チャート②：分類別配置</div>
+            <div class="chart-title">チャート②：分類別配置（時計回り・色分け）</div>
             <div class="chart-container">
                 <canvas id="radarChart2"></canvas>
             </div>
+        </div>
+
+        <div class="chart-block">
+            <div class="chart-title">チャート③：NISHI改分類配置</div>
+            <div class="chart-container">
+                <canvas id="radarChart3"></canvas>
+            </div>
+            <div class="color-legend">
+                <div style="font-weight: bold; margin-bottom: 8px;">【色の説明】</div>
+                <div class="legend-item">
+                    <div class="color-box" style="background-color: #ff6b6b;"></div>
+                    <span><strong>幸せ色</strong> (SR15, SR14, SR10, SR6)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background-color: #4dbd74;"></div>
+                    <span><strong>安心色</strong> (SR1, SR7, SR2, SR3)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background-color: #ffc107;"></div>
+                    <span><strong>トライ＆エラー色</strong> (SR4, SR9, SR11, SR12)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background-color: #20a8d8;"></div>
+                    <span><strong>視点の変更色</strong> (SR5, SR13, SR8, SR16)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="email-section">
+            <div class="email-title">PDF結果をメールで受け取る</div>
+            <input type="email" id="user-email" class="email-input" placeholder="example@email.com" required>
+            <button type="button" class="email-btn" onclick="sendPdfMail()">PDFをメールで送信する</button>
         </div>
     </div>
 </div>
@@ -205,15 +304,27 @@
         { text: "1. まったく 当てはまらない", value: 1 }
     ];
 
-    // チャート2用の設定（1から始まる番号ベースのインデックス、およびカラー設定）
+    // チャート2用の設定
     const chart2Order = [1, 14, 15, 2, 7, 8, 16, 3, 6, 9, 12, 4, 13, 5, 10, 11];
     
     function getColorForSR(srNumber) {
-        if ([1, 14, 15].includes(srNumber)) return '#2ecc71'; // 緑
-        if ([2, 7, 8, 16].includes(srNumber)) return '#e67e22'; // オレンジ
-        if ([3, 6, 9, 12].includes(srNumber)) return '#e74c3c'; // 赤
-        if ([4, 13].includes(srNumber)) return '#9b59b6'; // 紫
-        if ([5, 10, 11].includes(srNumber)) return '#3498db'; // 青
+        if ([1, 14, 15].includes(srNumber)) return '#2ecc71'; 
+        if ([2, 7, 8, 16].includes(srNumber)) return '#e67e22'; 
+        if ([3, 6, 9, 12].includes(srNumber)) return '#e74c3c'; 
+        if ([4, 13].includes(srNumber)) return '#9b59b6'; 
+        if ([5, 10, 11].includes(srNumber)) return '#3498db'; 
+        return '#7f8c8d';
+    }
+
+    // チャート3（NISHI改分類配置）用の設定
+    const chart3Order = [10, 6, 1, 7, 2, 3, 4, 9, 11, 12, 5, 13, 8, 16, 15, 14];
+    
+    // チャート3の色分けルール
+    function getColorForChart3(srNumber) {
+        if ([15, 14, 10, 6].includes(srNumber)) return '#ff6b6b';   // 幸せ色（パステル赤）
+        if ([1, 7, 2, 3].includes(srNumber)) return '#4dbd74';      // 安心色（パステル緑）
+        if ([4, 9, 11, 12].includes(srNumber)) return '#ffc107';    // トライ＆エラー色（黄色）
+        if ([5, 13, 8, 16].includes(srNumber)) return '#20a8d8';    // 視点の変更色（ライトブルー）
         return '#7f8c8d';
     }
 
@@ -255,6 +366,22 @@
 
     let chart1 = null;
     let chart2 = null;
+    let chart3 = null;
+
+    // 回答日時の自動生成と表示用の関数
+    function showDateTime() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const date = now.getDate();
+        const dayList = ['日', '月', '火', '水', '木', '金', '土'];
+        const day = dayList[now.getDay()];
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        const formatString = `回答日時：${year}年${month}月${date}日(${day}) ${hours}時${minutes}分`;
+        document.getElementById('answer-datetime').innerText = formatString;
+    }
 
     function calculateResult() {
         const baseScores = [];
@@ -277,14 +404,34 @@
             total += selectedValue;
         }
 
-        // 平均表示
+        // 平均表示 & 日時表示
         const avg = (total / questions.length).toFixed(2);
         document.getElementById('average-score').innerText = avg;
+        showDateTime(); 
         document.getElementById('result-section').style.display = 'block';
 
         // 古いグラフを破棄
         if (chart1) chart1.destroy();
         if (chart2) chart2.destroy();
+        if (chart3) chart3.destroy();
+
+        // 共通のグリッド・枠線スタイル調整（見やすく太くする設定）
+        const gridScaleOptions = {
+            suggestedMin: 1,
+            suggestedMax: 6,
+            ticks: { 
+                stepSize: 1,
+                font: { size: 11, weight: 'bold' }
+            },
+            grid: {
+                lineWidth: 2,          // チャートの同心円の線を太く
+                color: 'rgba(0, 0, 0, 0.15)'
+            },
+            angleLines: {
+                lineWidth: 2,          // 放射状の線を太く
+                color: 'rgba(0, 0, 0, 0.15)'
+            }
+        };
 
         // --- チャート1：標準描画 ---
         const ctx1 = document.getElementById('radarChart1').getContext('2d');
@@ -297,24 +444,34 @@
                     data: baseScores,
                     backgroundColor: 'rgba(52, 152, 219, 0.1)',
                     borderColor: 'rgba(52, 152, 219, 1)',
-                    borderWidth: 2,
-                    pointBackgroundColor: 'rgba(52, 152, 219, 1)'
+                    borderWidth: 4, // 線の太さをアップ
+                    pointBackgroundColor: 'rgba(52, 152, 219, 1)',
+                    pointRadius: 5
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { r: { suggestedMin: 1, suggestedMax: 6, ticks: { stepSize: 1 } } }
+                scales: { r: gridScaleOptions }
             }
         });
 
-        // --- チャート2：指定順＆個別色分け描画 ---
+        // --- チャート2：指定順＆個別色分け描画（線で繋がない） ---
         const ctx2 = document.getElementById('radarChart2').getContext('2d');
-        
-        // 指定された順序でラベルとスコア、および色リストを再構築
         const chart2Labels = chart2Order.map(num => `SR${num}`);
         const chart2Scores = chart2Order.map(num => baseScores[num - 1]);
         const chart2Colors = chart2Order.map(num => getColorForSR(num));
+
+        // チャート2独自のスケール設定（太めの設定を引き継ぎつつ、線の色を個別化）
+        const chart2ScaleOptions = JSON.parse(JSON.stringify(gridScaleOptions));
+        chart2ScaleOptions.pointLabels = {
+            color: chart2Colors,
+            font: { size: 13, weight: 'bold' }
+        };
+        chart2ScaleOptions.angleLines = {
+            color: chart2Colors,
+            lineWidth: 2.5 // 個別軸の線をより見やすく
+        };
 
         chart2 = new Chart(ctx2, {
             type: 'radar',
@@ -323,38 +480,71 @@
                 datasets: [{
                     label: 'スコア（分類別）',
                     data: chart2Scores,
-                    backgroundColor: 'rgba(149, 165, 166, 0.1)',
-                    borderColor: '#34495e',
-                    borderWidth: 2,
+                    showLine: false, // ★点と点を線で繋がない
                     pointBackgroundColor: chart2Colors,
                     pointBorderColor: '#fff',
-                    pointRadius: 4
+                    pointRadius: 6 // 点を少し大きく
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        suggestedMin: 1,
-                        suggestedMax: 6,
-                        ticks: { stepSize: 1 },
-                        // 文字（ラベル）の色を個別設定
-                        pointLabels: {
-                            color: chart2Colors,
-                            font: { size: 13, weight: 'bold' }
-                        },
-                        // 中心から各項目へ伸びる直線（グリッド線）の色を個別設定
-                        angleLines: {
-                            color: chart2Colors,
-                            lineWidth: 1.5
-                        }
-                    }
-                }
+                scales: { r: chart2ScaleOptions }
+            }
+        });
+
+
+        // --- チャート3：NISHI改分類配置（線で繋がない、指定色グループ化） ---
+        const ctx3 = document.getElementById('radarChart3').getContext('2d');
+        const chart3Labels = chart3Order.map(num => `SR${num}`);
+        const chart3Scores = chart3Order.map(num => baseScores[num - 1]);
+        const chart3Colors = chart3Order.map(num => getColorForChart3(num));
+
+        // チャート3のカスタムスケール（文字と軸線をご指定のカラーに）
+        const chart3ScaleOptions = JSON.parse(JSON.stringify(gridScaleOptions));
+        chart3ScaleOptions.pointLabels = {
+            color: chart3Colors,
+            font: { size: 13, weight: 'bold' }
+        };
+        chart3ScaleOptions.angleLines = {
+            color: chart3Colors,
+            lineWidth: 2.5
+        };
+
+        chart3 = new Chart(ctx3, {
+            type: 'radar',
+            data: {
+                labels: chart3Labels,
+                datasets: [{
+                    label: 'スコア（NISHI改分類配置）',
+                    data: chart3Scores,
+                    showLine: false, // ★点と点を線で繋がない
+                    pointBackgroundColor: chart3Colors,
+                    pointBorderColor: '#fff',
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { r: chart3ScaleOptions }
             }
         });
 
         document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // メール送信処理（シミュレーション・雛形）
+    function sendPdfMail() {
+        const email = document.getElementById('user-email').value;
+        if (!email) {
+            alert('メールアドレスを入力してください。');
+            return;
+        }
+        
+        // 実際の実装では、ここでサーバーサイド(PHP、Node.js、GAS等)に
+        // データを送信してPDFを生成・送信する処理を行います。
+        alert(`${email} 宛てに診断結果PDFを送信するリクエストを受け付けました。\n（※実際のメール送信にはサーバー側バックエンドプログラムとの連携が必要です）`);
     }
 </script>
 

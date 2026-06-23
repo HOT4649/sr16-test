@@ -314,7 +314,7 @@
         "SR3. つらい状況に陥ったときに、再び幸せな生活を取り戻すにはどうすればよいか心得ている",
         "SR4. ある人（たち）との関係が自分にとって良くない場合、それが満足できる関係になるまで様々な工夫や取り組みを行う",
         "SR5. 仕事、趣味、余暇、食事、パートナー関係など、生活の様々な要素をうまく調節しながら幸せに暮らせている",
-        "SR6. プレッシャーのかかる状況におかれた場合、いつも最終的には無事に乗り切れるような行動をとる",
+        "SR6. プレッシャーのかかる状況におかれた場合、いつも最終的には無さに乗り切れるような行動をとる",
         "SR7. 大切な目標を掲げた場合は、いつも自分の力でこれを達成することができる",
         "SR8. やりたいことができるような状況を、自分で作り出せているので、充実感とともに暮らしている",
         "SR9. 自分の行動が失敗を招いた場合、それは諦めではなく、むしろ新しいやり方を見つけ出すきっかけとなる",
@@ -598,46 +598,63 @@
         const img2 = document.getElementById('chart2-img');
         const img3 = document.getElementById('chart3-img');
 
+        // 1. 画像の読み込み完了を確実に待つプロミス
         const loadImage = (imgElement, canvasElement) => {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 imgElement.onload = () => resolve();
-                imgElement.src = canvasElement.toDataURL('image/png');
+                imgElement.onerror = (e) => reject(e);
+                try {
+                    imgElement.src = canvasElement.toDataURL('image/png');
+                } catch(e) {
+                    reject(e);
+                }
             });
         };
 
-        await Promise.all([
-            loadImage(img1, c1),
-            loadImage(img2, c2),
-            loadImage(img3, c3)
-        ]);
+        try {
+            // 2. Canvasのデータを画像要素にコピー
+            await Promise.all([
+                loadImage(img1, c1),
+                loadImage(img2, c2),
+                loadImage(img3, c3)
+            ]);
 
-        // 表示のオンオフ切り替え
-        c1.style.display = 'none';
-        c2.style.display = 'none';
-        c3.style.display = 'none';
+            // 3. 表示のオンオフ切り替え（html2pdfにキャプチャさせるため一時画像表示）
+            c1.style.display = 'none';
+            c2.style.display = 'none';
+            c3.style.display = 'none';
 
-        img1.style.display = 'block';
-        img2.style.display = 'block';
-        img3.style.display = 'block';
+            img1.style.display = 'block';
+            img2.style.display = 'block';
+            img3.style.display = 'block';
 
-        const element = document.getElementById('pdf-content');
-        
-        const opt = {
-            margin:       [10, 15, 10, 15], // 上下左右に適切なマージンを付与
-            filename:     '心理評価テスト_診断結果.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true, 
-                logging: false, 
-                delay: 200,
-                backgroundColor: '#ffffff' // 背景が透明化して白紙に見えるのを防ぐ
-            }, 
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+            // レンダリング安定化のためのディレイ
+            await new Promise(resolve => setTimeout(resolve, 300));
 
-        html2pdf().set(opt).from(element).save().then(() => {
-            // 元の画面表示に戻す
+            const element = document.getElementById('pdf-content');
+            
+            const opt = {
+                margin:       [10, 15, 10, 15],
+                filename:     '心理評価テスト_診断結果.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false, 
+                    delay: 500, // html2canvas内部の待機時間を少し長めに
+                    backgroundColor: '#ffffff'
+                }, 
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // 4. html2pdf.jsを正しくawaitで実行し完了を待つ
+            await html2pdf().set(opt).from(element).save();
+
+        } catch (err) {
+            console.error(err);
+            alert("PDF生成中にエラーが発生しました。");
+        } finally {
+            // 5. 必ず元の画面表示（グラフ表示）に戻す
             c1.style.display = 'block';
             c2.style.display = 'block';
             c3.style.display = 'block';
@@ -648,12 +665,7 @@
 
             btn.innerText = "診断結果PDFをダウンロード";
             btn.disabled = false;
-        }).catch(err => {
-            console.error(err);
-            alert("PDF生成中にエラーが発生しました。");
-            btn.innerText = "診断結果PDFをダウンロード";
-            btn.disabled = false;
-        });
+        }
     }
 </script>
 

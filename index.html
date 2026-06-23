@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>【SR 16】心理評価テスト</title>
-    <!-- レーダーチャートを描画するためのライブラリ（Chart.js）を読み込み -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -73,7 +72,6 @@
             margin-right: 12px;
             transform: scale(1.1);
         }
-        /* 選択された時のスタイル変更 */
         .option-label.selected {
             background-color: #e8f4fd;
             border-color: #3498db;
@@ -120,10 +118,24 @@
             font-weight: bold;
             color: #2980b9;
         }
+        .chart-block {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #fcfcfc;
+            border: 1px solid #e6e9ed;
+            border-radius: 8px;
+        }
+        .chart-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 15px;
+        }
         .chart-container {
             position: relative;
             margin: auto;
-            height: 350px;
+            height: 380px;
             width: 100%;
         }
     </style>
@@ -146,8 +158,19 @@
             <div class="score-value" id="average-score">0.0</div>
             <div style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">（6点満点）</div>
         </div>
-        <div class="chart-container">
-            <canvas id="radarChart"></canvas>
+
+        <div class="chart-block">
+            <div class="chart-title">チャート①：標準順（SR1 ～ SR16）</div>
+            <div class="chart-container">
+                <canvas id="radarChart1"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-block">
+            <div class="chart-title">チャート②：分類別配置（時計回り・色分け）</div>
+            <div class="chart-container">
+                <canvas id="radarChart2"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -173,7 +196,6 @@
         "SR16. 暮らしの中で何度も楽しい体験ができる様な状況を、自分でつくり出すことができる"
     ];
 
-    // 選択肢のデータ
     const options = [
         { text: "6. とても 当てはまる", value: 6 },
         { text: "5. かなり 当てはまる", value: 5 },
@@ -183,12 +205,23 @@
         { text: "1. まったく 当てはまらない", value: 1 }
     ];
 
-    // 画面に質問を自動生成する
+    // チャート2用の設定（1から始まる番号ベースのインデックス、およびカラー設定）
+    const chart2Order = [1, 14, 15, 2, 7, 8, 16, 3, 6, 9, 12, 4, 13, 5, 10, 11];
+    
+    function getColorForSR(srNumber) {
+        if ([1, 14, 15].includes(srNumber)) return '#2ecc71'; // 緑
+        if ([2, 7, 8, 16].includes(srNumber)) return '#e67e22'; // オレンジ
+        if ([3, 6, 9, 12].includes(srNumber)) return '#e74c3c'; // 赤
+        if ([4, 13].includes(srNumber)) return '#9b59b6'; // 紫
+        if ([5, 10, 11].includes(srNumber)) return '#3498db'; // 青
+        return '#7f8c8d';
+    }
+
+    // 画面に質問を自動生成
     const container = document.getElementById('questions-container');
     questions.forEach((q, qIndex) => {
         const qBlock = document.createElement('div');
         qBlock.className = 'question-block';
-
         const qText = document.createElement('div');
         qText.className = 'question-text';
         qText.innerText = q;
@@ -200,38 +233,32 @@
         options.forEach((opt) => {
             const label = document.createElement('label');
             label.className = 'option-label';
-            
             const input = document.createElement('input');
             input.type = 'radio';
             input.name = `q${qIndex}`;
             input.value = opt.value;
             input.required = true;
 
-            // クリックしたときに見栄えを変えるイベント
             input.addEventListener('change', function() {
                 const siblings = optionsDiv.querySelectorAll('.option-label');
                 siblings.forEach(s => s.classList.remove('selected'));
-                if (this.checked) {
-                    label.classList.add('selected');
-                }
+                if (this.checked) label.classList.add('selected');
             });
 
             label.appendChild(input);
             label.appendChild(document.createTextNode(opt.text));
             optionsDiv.appendChild(label);
         });
-
         qBlock.appendChild(optionsDiv);
         container.appendChild(qBlock);
     });
 
-    let myRadarChart = null;
+    let chart1 = null;
+    let chart2 = null;
 
-    // 計算とグラフ描画の処理
     function calculateResult() {
-        const scores = [];
+        const baseScores = [];
         let total = 0;
-        let answeredCount = 0;
 
         for (let i = 0; i < questions.length; i++) {
             const radios = document.getElementsByName(`q${i}`);
@@ -242,46 +269,66 @@
                     break;
                 }
             }
-            
             if (selectedValue === null) {
                 alert(`質問 SR${i + 1} にまだ回答していません。`);
                 return;
             }
-            
-            scores.push(selectedValue);
+            baseScores.push(selectedValue);
             total += selectedValue;
-            answeredCount++;
         }
 
-        // 平均点の計算
-        const avg = (total / answeredCount).toFixed(2);
+        // 平均表示
+        const avg = (total / questions.length).toFixed(2);
         document.getElementById('average-score').innerText = avg;
-
-        // 結果エリアを表示
         document.getElementById('result-section').style.display = 'block';
 
-        // グラフの描画（すでにグラフがある場合は一旦破棄）
-        if (myRadarChart) {
-            myRadarChart.destroy();
-        }
+        // 古いグラフを破棄
+        if (chart1) chart1.destroy();
+        if (chart2) chart2.destroy();
 
-        const ctx = document.getElementById('radarChart').getContext('2d');
-        
-        // グラフのラベル（SR1〜SR16）を作成
-        const labels = questions.map((_, i) => `SR${i + 1}`);
-
-        myRadarChart = new Chart(ctx, {
+        // --- チャート1：標準描画 ---
+        const ctx1 = document.getElementById('radarChart1').getContext('2d');
+        chart1 = new Chart(ctx1, {
             type: 'radar',
             data: {
-                labels: labels,
+                labels: questions.map((_, i) => `SR${i + 1}`),
                 datasets: [{
-                    label: 'あなたのスコア',
-                    data: scores,
-                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    label: 'スコア（標準順）',
+                    data: baseScores,
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
                     borderColor: 'rgba(52, 152, 219, 1)',
                     borderWidth: 2,
-                    pointBackgroundColor: 'rgba(52, 152, 219, 1)',
-                    pointRadius: 3
+                    pointBackgroundColor: 'rgba(52, 152, 219, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { r: { suggestedMin: 1, suggestedMax: 6, ticks: { stepSize: 1 } } }
+            }
+        });
+
+        // --- チャート2：指定順＆個別色分け描画 ---
+        const ctx2 = document.getElementById('radarChart2').getContext('2d');
+        
+        // 指定された順序でラベルとスコア、および色リストを再構築
+        const chart2Labels = chart2Order.map(num => `SR${num}`);
+        const chart2Scores = chart2Order.map(num => baseScores[num - 1]);
+        const chart2Colors = chart2Order.map(num => getColorForSR(num));
+
+        chart2 = new Chart(ctx2, {
+            type: 'radar',
+            data: {
+                labels: chart2Labels,
+                datasets: [{
+                    label: 'スコア（分類別）',
+                    data: chart2Scores,
+                    backgroundColor: 'rgba(149, 165, 166, 0.1)',
+                    borderColor: '#34495e',
+                    borderWidth: 2,
+                    pointBackgroundColor: chart2Colors,
+                    pointBorderColor: '#fff',
+                    pointRadius: 4
                 }]
             },
             options: {
@@ -289,16 +336,24 @@
                 maintainAspectRatio: false,
                 scales: {
                     r: {
-                        angleLines: { display: true },
                         suggestedMin: 1,
                         suggestedMax: 6,
-                        ticks: { stepSize: 1 }
+                        ticks: { stepSize: 1 },
+                        // 文字（ラベル）の色を個別設定
+                        pointLabels: {
+                            color: chart2Colors,
+                            font: { size: 13, weight: 'bold' }
+                        },
+                        // 中心から各項目へ伸びる直線（グリッド線）の色を個別設定
+                        angleLines: {
+                            color: chart2Colors,
+                            lineWidth: 1.5
+                        }
                     }
                 }
             }
         });
 
-        // 結果位置まで画面をスムーズにスクロール
         document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
     }
 </script>

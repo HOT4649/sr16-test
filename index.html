@@ -12,16 +12,17 @@
             color: #333333;
             margin: 0;
             padding: 20px;
-            display: flex;
-            justify-content: center;
+            /* html2pdfのバグを回避するため、bodyでのdisplay: flexを廃止 */
         }
         .container {
             max-width: 700px;
             width: 100%;
+            margin: 0 auto; /* display: flexの代わりにmarginで中央寄せを実現 */
             background-color: #ffffff;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
         }
         h1 {
             text-align: center;
@@ -50,13 +51,10 @@
             line-height: 1.5;
         }
         .options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            display: block; /* Flexboxを避けるためblockに修正 */
         }
         .option-label {
-            display: flex;
-            align-items: center;
+            display: block; /* flexからblockへ変更し、内部の配置を調整 */
             padding: 10px;
             border: 1px solid #dcdde1;
             border-radius: 6px;
@@ -64,6 +62,7 @@
             background-color: #ffffff;
             transition: all 0.2s ease;
             font-size: 14px;
+            margin-bottom: 10px;
         }
         .option-label:hover {
             background-color: #f1f2f6;
@@ -72,6 +71,7 @@
         .option-label input {
             margin-right: 12px;
             transform: scale(1.1);
+            vertical-align: middle;
         }
         .option-label.selected {
             background-color: #e8f4fd;
@@ -104,7 +104,7 @@
         /* PDF出力エリアの設定 */
         #pdf-content {
             background-color: #ffffff;
-            padding: 15px;
+            padding: 20px;
         }
         .result-title {
             text-align: center;
@@ -148,7 +148,7 @@
         }
         .chart-container {
             position: relative;
-            margin: auto;
+            margin: 0 auto;
             height: 380px;
             width: 100%;
         }
@@ -157,7 +157,7 @@
             display: none;
             max-width: 100%;
             height: auto;
-            margin: auto;
+            margin: 0 auto;
         }
         .color-legend {
             margin-top: 15px;
@@ -168,20 +168,23 @@
             font-size: 13px;
         }
         .legend-item {
-            display: flex;
-            align-items: flex-start;
             margin-bottom: 8px;
+            overflow: hidden; /* flexの代用としての回り込み解除 */
         }
         .legend-item:last-child {
             margin-bottom: 0;
         }
         .color-box {
+            float: left; /* flexを避けるためfloatに変更 */
             width: 30px;
             height: 16px;
             margin-right: 10px;
             border-radius: 3px;
-            flex-shrink: 0;
             margin-top: 2px;
+        }
+        .legend-text {
+            display: block;
+            margin-left: 40px;
         }
         .download-section {
             background-color: #eafaf1;
@@ -248,23 +251,23 @@
                     <div style="font-weight: bold; margin-bottom: 8px;">【チャート②：色の説明】</div>
                     <div class="legend-item">
                         <div class="color-box" style="background-color: #00d2d3;"></div>
-                        <span><strong>心理的ウェルビーイングと活力 (内面的な状態の維持)</strong><br><span style="color:#666; font-size:11px;">対象：SR1, SR14, SR15</span></span>
+                        <span class="legend-text"><strong>心理的ウェルビーイングと活力 (内面的な状態の維持)</strong><br><span style="color:#666; font-size:11px;">対象：SR1, SR14, SR15</span></span>
                     </div>
                     <div class="legend-item">
                         <div class="color-box" style="background-color: #ff9f43;"></div>
-                        <span><strong>目標達成と自己効力感 (望む状況の実現)</strong><br><span style="color:#666; font-size:11px;">対象：SR2, SR7, SR8, SR16</span></span>
+                        <span class="legend-text"><strong>目標達成と自己効力感 (望む状況の実現)</strong><br><span style="color:#666; font-size:11px;">対象：SR2, SR7, SR8, SR16</span></span>
                     </div>
                     <div class="legend-item">
                         <div class="color-box" style="background-color: #10ac84;"></div>
-                        <span><strong>レジリエンスとストレス対処 (逆境からの回復)</strong><br><span style="color:#666; font-size:11px;">対象：SR3, SR6, SR9, SR12</span></span>
+                        <span class="legend-text"><strong>レジリエンスとストレス対処 (逆境からの回復)</strong><br><span style="color:#666; font-size:11px;">対象：SR3, SR6, SR9, SR12</span></span>
                     </div>
                     <div class="legend-item">
                         <div class="color-box" style="background-color: #54a0ff;"></div>
-                        <span><strong>対人関係における自律性 (境界線と調整)</strong><br><span style="color:#666; font-size:11px;">対象：SR4, SR13</span></span>
+                        <span class="legend-text"><strong>対人関係における自律性 (境界線と調整)</strong><br><span style="color:#666; font-size:11px;">対象：SR4, SR13</span></span>
                     </div>
                     <div class="legend-item">
                         <div class="color-box" style="background-color: #9b59b6;"></div>
-                        <span><strong>生活の統合的調整と問題解決 (戦略的行動)</strong><br><span style="color:#666; font-size:11px;">対象：SR5, SR10, SR11</span></span>
+                        <span class="legend-text"><strong>生活の統合的調整と問題解決 (戦略的行動)</strong><br><span style="color:#666; font-size:11px;">対象：SR5, SR10, SR11</span></span>
                     </div>
                 </div>
             </div>
@@ -279,19 +282,19 @@
                     <div style="font-weight: bold; margin-bottom: 8px;">【チャート③：色の説明】</div>
                     <div class="legend-item">
                         <div class="color-box" style="background-color: #d11a5b;"></div>
-                        <span><strong>幸せ色</strong> (SR15, SR14, SR10, SR6)</span>
+                        <span class="legend-text"><strong>幸せ色</strong> (SR15, SR14, SR10, SR6)</span>
                     </div>
                     <div class="legend-item">
                         <div class="color-box" style="background-color: #00b894;"></div>
-                        <span><strong>安心色</strong> (SR1, SR7, SR2, SR3)</span>
+                        <span class="legend-text"><strong>安心色</strong> (SR1, SR7, SR2, SR3)</span>
                     </div>
                     <div class="legend-item">
                         <div class="color-box" style="background-color: #f39c12;"></div>
-                        <span><strong>トライ＆エラー色</strong> (SR4, SR9, SR11, SR12)</span>
+                        <span class="legend-text"><strong>トライ＆エラー色</strong> (SR4, SR9, SR11, SR12)</span>
                     </div>
                     <div class="legend-item">
                         <div class="color-box" style="background-color: #2980b9;"></div>
-                        <span><strong>視点の変更色</strong> (SR5, SR13, SR8, SR16)</span>
+                        <span class="legend-text"><strong>視点の変更色</strong> (SR5, SR13, SR8, SR16)</span>
                     </div>
                 </div>
             </div>
@@ -311,7 +314,7 @@
         "SR3. つらい状況に陥ったときに、再び幸せな生活を取り戻すにはどうすればよいか心得ている",
         "SR4. ある人（たち）との関係が自分にとって良くない場合、それが満足できる関係になるまで様々な工夫や取り組みを行う",
         "SR5. 仕事、趣味、余暇、食事、パートナー関係など、生活の様々な要素をうまく調節しながら幸せに暮らせている",
-        "SR6. プレッシャーのかかる状況におかれた場合、いつも最終的には無さに乗り切れるような行動をとる",
+        "SR6. プレッシャーのかかる状況におかれた場合、いつも最終的には無事に乗り切れるような行動をとる",
         "SR7. 大切な目標を掲げた場合は、いつも自分の力でこれを達成することができる",
         "SR8. やりたいことができるような状況を、自分で作り出せているので、充実感とともに暮らしている",
         "SR9. 自分の行動が失敗を招いた場合、それは諦めではなく、むしろ新しいやり方を見つけ出すきっかけとなる",
@@ -355,7 +358,7 @@
     }
 
     // 質問フォーム生成
-    const container = document.getElementById('questions-container');
+    const qContainer = document.getElementById('questions-container');
     questions.forEach((q, qIndex) => {
         const qBlock = document.createElement('div');
         qBlock.className = 'question-block';
@@ -387,7 +390,7 @@
             optionsDiv.appendChild(label);
         });
         qBlock.appendChild(optionsDiv);
-        container.appendChild(qBlock);
+        qContainer.appendChild(qBlock);
     });
 
     let chart1 = null;
@@ -431,7 +434,7 @@
         document.getElementById('average-score').innerText = avg;
         document.getElementById('answer-datetime').innerText = `回答日時：${showDateTime()}`;
 
-        // 再計算時は画像フォールバックを隠し、Canvasを表示する状態に戻す
+        // Canvasを表示状態にリセット
         document.getElementById('radarChart1').style.display = 'block';
         document.getElementById('radarChart2').style.display = 'block';
         document.getElementById('radarChart3').style.display = 'block';
@@ -445,7 +448,6 @@
         if (chart2) chart2.destroy();
         if (chart3) chart3.destroy();
 
-        // 【中心を0、最大を6に完全固定する設定】
         const gridScaleOptions = {
             min: 0,
             max: 6,
@@ -582,7 +584,7 @@
         document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // PDFダウンロード生成：非同期の読み込み完了を確実に待つように改善
+    // PDFダウンロード生成
     async function downloadResultPDF() {
         const btn = document.getElementById('btn-pdf');
         btn.innerText = "PDF生成中...";
@@ -596,7 +598,6 @@
         const img2 = document.getElementById('chart2-img');
         const img3 = document.getElementById('chart3-img');
 
-        // 各画像タグが完全にBase64データをロードしたか判定するためのPromise関数
         const loadImage = (imgElement, canvasElement) => {
             return new Promise((resolve) => {
                 imgElement.onload = () => resolve();
@@ -604,14 +605,13 @@
             });
         };
 
-        // 3つの画像がブラウザに完全にロードされるのを同期的に待つ
         await Promise.all([
             loadImage(img1, c1),
             loadImage(img2, c2),
             loadImage(img3, c3)
         ]);
 
-        // 表示のオンオフを切り替え（PDFライブラリに確実に画像として認識させる）
+        // 表示のオンオフ切り替え
         c1.style.display = 'none';
         c2.style.display = 'none';
         c3.style.display = 'none';
@@ -623,16 +623,21 @@
         const element = document.getElementById('pdf-content');
         
         const opt = {
-            margin:       10,
+            margin:       [10, 15, 10, 15], // 上下左右に適切なマージンを付与
             filename:     '心理評価テスト_診断結果.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, logging: false, delay: 300 }, 
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true, 
+                logging: false, 
+                delay: 200,
+                backgroundColor: '#ffffff' // 背景が透明化して白紙に見えるのを防ぐ
+            }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // PDF生成を実行
         html2pdf().set(opt).from(element).save().then(() => {
-            // PDF出力が終わったら元の画面表示（インタラクティブなCanvas）に戻す
+            // 元の画面表示に戻す
             c1.style.display = 'block';
             c2.style.display = 'block';
             c3.style.display = 'block';
@@ -641,6 +646,11 @@
             img2.style.display = 'none';
             img3.style.display = 'none';
 
+            btn.innerText = "診断結果PDFをダウンロード";
+            btn.disabled = false;
+        }).catch(err => {
+            console.error(err);
+            alert("PDF生成中にエラーが発生しました。");
             btn.innerText = "診断結果PDFをダウンロード";
             btn.disabled = false;
         });

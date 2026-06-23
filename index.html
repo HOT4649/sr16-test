@@ -101,10 +101,10 @@
             border-top: 2px solid #e1e8ed;
             padding-top: 30px;
         }
-        /* PDF出力時に見栄えを保つためのエリア設定 */
+        /* PDF出力エリアの設定 */
         #pdf-content {
             background-color: #ffffff;
-            padding: 10px;
+            padding: 15px;
         }
         .result-title {
             text-align: center;
@@ -137,7 +137,7 @@
             background-color: #fcfcfc;
             border: 1px solid #e6e9ed;
             border-radius: 8px;
-            page-break-inside: avoid; /* PDF化の際の途切れ防止 */
+            page-break-inside: avoid; /* PDF化の際のページ途中切れ防止 */
         }
         .chart-title {
             text-align: center;
@@ -162,8 +162,8 @@
         }
         .legend-item {
             display: flex;
-            align-items: center;
-            margin-bottom: 6px;
+            align-items: flex-start;
+            margin-bottom: 8px;
         }
         .legend-item:last-child {
             margin-bottom: 0;
@@ -173,6 +173,8 @@
             height: 16px;
             margin-right: 10px;
             border-radius: 3px;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
         .download-section {
             background-color: #eafaf1;
@@ -232,6 +234,29 @@
                 <div class="chart-title">チャート②：分類別配置（時計回り・同色線繋ぎ）</div>
                 <div class="chart-container">
                     <canvas id="radarChart2"></canvas>
+                </div>
+                <div class="color-legend">
+                    <div style="font-weight: bold; margin-bottom: 8px;">【チャート②：色の説明】</div>
+                    <div class="legend-item">
+                        <div class="color-box" style="background-color: #00d2d3;"></div>
+                        <span><strong>心理的ウェルビーイングと活力 (内面的な状態の維持)</strong><br><span style="color:#666; font-size:11px;">対象：SR1, SR14, SR15</span></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box" style="background-color: #ff9f43;"></div>
+                        <span><strong>目標達成と自己効力感 (望む状況の実現)</strong><br><span style="color:#666; font-size:11px;">対象：SR2, SR7, SR8, SR16</span></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box" style="background-color: #10ac84;"></div>
+                        <span><strong>レジリエンスとストレス対処 (逆境からの回復)</strong><br><span style="color:#666; font-size:11px;">対象：SR3, SR6, SR9, SR12</span></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box" style="background-color: #54a0ff;"></div>
+                        <span><strong>対人関係における自律性 (境界線と調整)</strong><br><span style="color:#666; font-size:11px;">対象：SR4, SR13</span></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box" style="background-color: #9b59b6;"></div>
+                        <span><strong>生活の統合的調整と問題解決 (戦略的行動)</strong><br><span style="color:#666; font-size:11px;">対象：SR5, SR10, SR11</span></span>
+                    </div>
                 </div>
             </div>
 
@@ -301,25 +326,23 @@
     // --- チャート②用の設定 ---
     const chart2Order = [1, 14, 15, 2, 7, 8, 16, 3, 6, 9, 12, 4, 13, 5, 10, 11];
     
-    // チャート②の色分け（チャート③と完全別色：淡めで見やすい色相に設定）
     function getColorForChart2(srNumber) {
-        if ([1, 14, 15].includes(srNumber)) return '#00d2d3';    // シアン（青緑）
-        if ([2, 7, 8, 16].includes(srNumber)) return '#ff9f43';   // ライトオレンジ
-        if ([3, 6, 9, 12].includes(srNumber)) return '#10ac84';   // ダークミントグリーン
-        if ([4, 13].includes(srNumber)) return '#54a0ff';         // スカイブルー
-        if ([5, 10, 11].includes(srNumber)) return '#9b59b6';     // パープル
+        if ([1, 14, 15].includes(srNumber)) return '#00d2d3';    
+        if ([2, 7, 8, 16].includes(srNumber)) return '#ff9f43';   
+        if ([3, 6, 9, 12].includes(srNumber)) return '#10ac84';   
+        if ([4, 13].includes(srNumber)) return '#54a0ff';         
+        if ([5, 10, 11].includes(srNumber)) return '#9b59b6';     
         return '#7f8c8d';
     }
 
     // --- チャート③用の設定（NISHI改分類配置） ---
     const chart3Order = [10, 6, 1, 7, 2, 3, 4, 9, 11, 12, 5, 13, 8, 16, 15, 14];
     
-    // チャート③の色分け（幸せ色、安心色、トライ＆エラー色、視点の変更色）
     function getColorForChart3(srNumber) {
-        if ([15, 14, 10, 6].includes(srNumber)) return '#d11a5b';   // 幸せ色（ビビッドな赤紫）
-        if ([1, 7, 2, 3].includes(srNumber)) return '#00b894';      // 安心色（深みのあるエメラルド）
-        if ([4, 9, 11, 12].includes(srNumber)) return '#f39c12';    // トライ＆エラー色（ディープイエロー）
-        if ([5, 13, 8, 16].includes(srNumber)) return '#2980b9';    // 視点の変更色（鮮やかなブルー）
+        if ([15, 14, 10, 6].includes(srNumber)) return '#d11a5b';   
+        if ([1, 7, 2, 3].includes(srNumber)) return '#00b894';      
+        if ([4, 9, 11, 12].includes(srNumber)) return '#f39c12';    
+        if ([5, 13, 8, 16].includes(srNumber)) return '#2980b9';    
         return '#7f8c8d';
     }
 
@@ -444,6 +467,7 @@
                 }]
             },
             options: {
+                animation: false, // ★PDF化の白紙バグ対策
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: { r: gridScaleOptions }
@@ -455,7 +479,6 @@
         const chart2Labels = chart2Order.map(num => `SR${num}`);
         const chart2Colors = chart2Order.map(num => getColorForChart2(num));
 
-        // グループごとに「同じ色なら値を保持、違う色ならnull」のデータ配列を作り、データセットを分ける
         const groups = [
             { label: 'グループA', items: [1, 14, 15], color: '#00d2d3' },
             { label: 'グループB', items: [2, 7, 8, 16], color: '#ff9f43' },
@@ -473,11 +496,11 @@
                 data: dataForGroup,
                 borderColor: g.color,
                 backgroundColor: 'transparent',
-                borderWidth: 4,          // 線を太く
+                borderWidth: 4,          
                 pointBackgroundColor: g.color,
                 pointBorderColor: '#fff',
                 pointRadius: 6,
-                spanGaps: false         // null を跨いで線を繋がない設定
+                spanGaps: false         
             };
         });
 
@@ -498,9 +521,10 @@
                 datasets: chart2Datasets
             },
             options: {
+                animation: false, // ★PDF化の白紙バグ対策
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } }, // 分割用ラベルは非表示
+                plugins: { legend: { display: false } }, 
                 scales: { r: chart2ScaleOptions }
             }
         });
@@ -528,13 +552,14 @@
                 datasets: [{
                     label: 'スコア（NISHI改分類配置）',
                     data: chart3Scores,
-                    showLine: false, // ★点は線で繋がない
+                    showLine: false, 
                     pointBackgroundColor: chart3Colors,
                     pointBorderColor: '#fff',
                     pointRadius: 6
                 }]
             },
             options: {
+                animation: false, // ★PDF化の白紙バグ対策
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: { r: chart3ScaleOptions }
@@ -548,16 +573,14 @@
     function downloadResultPDF() {
         const element = document.getElementById('pdf-content');
         
-        // PDFの出力設定
         const opt = {
             margin:       10,
             filename:     '心理評価テスト_診断結果.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true }, // 高解像度化
+            html2canvas:  { scale: 2, useCORS: true, logging: false }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // PDF生成および保存の実行
         html2pdf().set(opt).from(element).save();
     }
 </script>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面白い神経衰弱ゲーム</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #eef2f3; margin: 0; padding: 20px; }
+        h1 { color: #333; font-size: 24px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 80px); gap: 10px; justify-content: center; margin-top: 20px; }
+        .card { width: 80px; height: 110px; background: #2c3e50; color: white; display: flex; align-items: center; justify-content: center; font-size: 32px; cursor: pointer; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); user-select: none; }
+        .card.flipped { background: white; color: black; transform: rotateY(180deg); transition: transform 0.3s; }
+    </style>
+</head>
+<body>
+
+    <h1>🤪 おもしろ神経衰弱 👻</h1>
+    <div class="grid" id="grid"></div>
+
+    <script>
+        const icons = ['🤪', '👻', '💩', '👽', '🤡', '🤖', '🐙', '🥑'];
+        let deck = [...icons, ...icons];
+        deck.sort(() => Math.random() - 0.5);
+
+        const grid = document.getElementById('grid');
+        let flippedCards = [];
+
+        deck.forEach((icon) => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.value = icon;
+            card.textContent = '？';
+
+            card.addEventListener('click', () => {
+                if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
+                    card.classList.add('flipped');
+                    card.textContent = card.dataset.value;
+                    flippedCards.push(card);
+
+                    if (flippedCards.length === 2) {
+                        setTimeout(checkMatch, 800);
+                    }
+                }
+            });
+            grid.appendChild(card);
+        });
+
+        function checkMatch() {
+            if (flippedCards[0].dataset.value === flippedCards[1].dataset.value) {
+                flippedCards = [];
+            } else {
+                flippedCards.forEach(card => {
+                    card.classList.remove('flipped');
+                    card.textContent = '？';
+                });
+                flippedCards = [];
+            }
+        }
+    </script>
+</body>
+</html>

@@ -5,7 +5,7 @@
     <title>【SR 16】心理評価テスト</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -13,12 +13,11 @@
             color: #333333;
             margin: 0;
             padding: 20px;
-            /* html2pdfのバグを回避するため、bodyでのdisplay: flexを廃止 */
         }
         .container {
             max-width: 700px;
             width: 100%;
-            margin: 0 auto; /* display: flexの代わりにmarginで中央寄せを実現 */
+            margin: 0 auto;
             background-color: #ffffff;
             padding: 30px;
             border-radius: 12px;
@@ -52,10 +51,10 @@
             line-height: 1.5;
         }
         .options {
-            display: block; /* Flexboxを避けるためblockに修正 */
+            display: block;
         }
         .option-label {
-            display: block; /* flexからblockへ変更し、内部の配置を調整 */
+            display: block;
             padding: 10px;
             border: 1px solid #dcdde1;
             border-radius: 6px;
@@ -102,10 +101,14 @@
             border-top: 2px solid #e1e8ed;
             padding-top: 30px;
         }
-        /* PDF出力エリアの設定 */
+        /* PDF出力エリアおよび改ページ用の設定 */
         #pdf-content {
             background-color: #ffffff;
-            padding: 20px;
+        }
+        .pdf-page {
+            background-color: #ffffff;
+            padding: 20px 10px;
+            box-sizing: border-box;
         }
         .result-title {
             text-align: center;
@@ -133,12 +136,11 @@
             color: #2980b9;
         }
         .chart-block {
-            margin-bottom: 40px;
+            margin-bottom: 10px;
             padding: 20px;
             background-color: #fcfcfc;
             border: 1px solid #e6e9ed;
             border-radius: 8px;
-            page-break-inside: avoid;
         }
         .chart-title {
             text-align: center;
@@ -153,7 +155,6 @@
             height: 380px;
             width: 100%;
         }
-        /* PDF化の際に一時的に差し替えるためのコンテナ画像スタイル */
         .chart-img-fallback {
             display: none;
             max-width: 100%;
@@ -170,13 +171,13 @@
         }
         .legend-item {
             margin-bottom: 8px;
-            overflow: hidden; /* flexの代用としての回り込み解除 */
+            overflow: hidden;
         }
         .legend-item:last-child {
             margin-bottom: 0;
         }
         .color-box {
-            float: left; /* flexを避けるためfloatに変更 */
+            float: left;
             width: 30px;
             height: 16px;
             margin-right: 10px;
@@ -225,77 +226,83 @@
 
     <div id="result-section">
         <div id="pdf-content">
-            <h2 class="result-title">診断結果</h2>
-            <div class="datetime-box" id="answer-datetime"></div>
+            <div class="pdf-page">
+                <h2 class="result-title">診断結果</h2>
+                <div class="datetime-box" id="answer-datetime"></div>
 
-            <div class="score-box">
-                <div>全体の平均点</div>
-                <div class="score-value" id="average-score">0.0</div>
-                <div style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">（6点満点）</div>
-            </div>
-
-            <div class="chart-block">
-                <div class="chart-title">チャート①：標準順（SR1 ～ SR16）</div>
-                <div class="chart-container" id="container1">
-                    <canvas id="radarChart1"></canvas>
-                    <img id="chart1-img" class="chart-img-fallback" alt="Chart 1">
+                <div class="score-box">
+                    <div>全体の平均点</div>
+                    <div class="score-value" id="average-score">0.0</div>
+                    <div style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">（6点満点）</div>
                 </div>
-            </div>
 
-            <div class="chart-block">
-                <div class="chart-title">チャート②：分類別配置（時計回り・同色線繋ぎ）</div>
-                <div class="chart-container" id="container2">
-                    <canvas id="radarChart2"></canvas>
-                    <img id="chart2-img" class="chart-img-fallback" alt="Chart 2">
-                </div>
-                <div class="color-legend">
-                    <div style="font-weight: bold; margin-bottom: 8px;">【チャート②：色の説明】</div>
-                    <div class="legend-item">
-                        <div class="color-box" style="background-color: #00d2d3;"></div>
-                        <span class="legend-text"><strong>心理的ウェルビーイングと活力 (内面的な状態の維持)</strong><br><span style="color:#666; font-size:11px;">対象：SR1, SR14, SR15</span></span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box" style="background-color: #ff9f43;"></div>
-                        <span class="legend-text"><strong>目標達成と自己効力感 (望む状況の実現)</strong><br><span style="color:#666; font-size:11px;">対象：SR2, SR7, SR8, SR16</span></span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box" style="background-color: #10ac84;"></div>
-                        <span class="legend-text"><strong>レジリエンスとストレス対処 (逆境からの回復)</strong><br><span style="color:#666; font-size:11px;">対象：SR3, SR6, SR9, SR12</span></span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box" style="background-color: #54a0ff;"></div>
-                        <span class="legend-text"><strong>対人関係における自律性 (境界線と調整)</strong><br><span style="color:#666; font-size:11px;">対象：SR4, SR13</span></span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box" style="background-color: #9b59b6;"></div>
-                        <span class="legend-text"><strong>生活の統合的調整と問題解決 (戦略的行動)</strong><br><span style="color:#666; font-size:11px;">対象：SR5, SR10, SR11</span></span>
+                <div class="chart-block">
+                    <div class="chart-title">チャート①：標準順（SR1 ～ SR16）</div>
+                    <div class="chart-container" id="container1">
+                        <canvas id="radarChart1"></canvas>
+                        <img id="chart1-img" class="chart-img-fallback" alt="Chart 1">
                     </div>
                 </div>
             </div>
 
-            <div class="chart-block">
-                <div class="chart-title">チャート③：NISHI改分類配置</div>
-                <div class="chart-container" id="container3">
-                    <canvas id="radarChart3"></canvas>
-                    <img id="chart3-img" class="chart-img-fallback" alt="Chart 3">
+            <div class="pdf-page">
+                <div class="chart-block">
+                    <div class="chart-title">チャート②：分類別配置（時計回り・同色線繋ぎ）</div>
+                    <div class="chart-container" id="container2">
+                        <canvas id="radarChart2"></canvas>
+                        <img id="chart2-img" class="chart-img-fallback" alt="Chart 2">
+                    </div>
+                    <div class="color-legend">
+                        <div style="font-weight: bold; margin-bottom: 8px;">【チャート②：色の説明】</div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #00d2d3;"></div>
+                            <span class="legend-text"><strong>心理的ウェルビーイングと活力 (内面的な状態の維持)</strong><br><span style="color:#666; font-size:11px;">対象：SR1, SR14, SR15</span></span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #ff9f43;"></div>
+                            <span class="legend-text"><strong>目標達成と自己効力感 (望む状況の実現)</strong><br><span style="color:#666; font-size:11px;">対象：SR2, SR7, SR8, SR16</span></span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #10ac84;"></div>
+                            <span class="legend-text"><strong>レジリエンスとストレス対処 (逆境からの回復)</strong><br><span style="color:#666; font-size:11px;">対象：SR3, SR6, SR9, SR12</span></span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #54a0ff;"></div>
+                            <span class="legend-text"><strong>対人関係における自律性 (境界線と調整)</strong><br><span style="color:#666; font-size:11px;">対象：SR4, SR13</span></span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #9b59b6;"></div>
+                            <span class="legend-text"><strong>生活の統合的調整と問題解決 (戦略的行動)</strong><br><span style="color:#666; font-size:11px;">対象：SR5, SR10, SR11</span></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="color-legend">
-                    <div style="font-weight: bold; margin-bottom: 8px;">【チャート③：色の説明】</div>
-                    <div class="legend-item">
-                        <div class="color-box" style="background-color: #d11a5b;"></div>
-                        <span class="legend-text"><strong>幸せ色</strong> (SR15, SR14, SR10, SR6)</span>
+            </div>
+
+            <div class="pdf-page">
+                <div class="chart-block">
+                    <div class="chart-title">チャート③：NISHI改分類配置</div>
+                    <div class="chart-container" id="container3">
+                        <canvas id="radarChart3"></canvas>
+                        <img id="chart3-img" class="chart-img-fallback" alt="Chart 3">
                     </div>
-                    <div class="legend-item">
-                        <div class="color-box" style="background-color: #00b894;"></div>
-                        <span class="legend-text"><strong>安心色</strong> (SR1, SR7, SR2, SR3)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box" style="background-color: #f39c12;"></div>
-                        <span class="legend-text"><strong>トライ＆エラー色</strong> (SR4, SR9, SR11, SR12)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box" style="background-color: #2980b9;"></div>
-                        <span class="legend-text"><strong>視点の変更色</strong> (SR5, SR13, SR8, SR16)</span>
+                    <div class="color-legend">
+                        <div style="font-weight: bold; margin-bottom: 8px;">【チャート③：色の説明】</div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #d11a5b;"></div>
+                            <span class="legend-text"><strong>幸せ色</strong> (SR15, SR14, SR10, SR6)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #00b894;"></div>
+                            <span class="legend-text"><strong>安心色</strong> (SR1, SR7, SR2, SR3)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #f39c12;"></div>
+                            <span class="legend-text"><strong>トライ＆エラー色</strong> (SR4, SR9, SR11, SR12)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #2980b9;"></div>
+                            <span class="legend-text"><strong>視点の変更色</strong> (SR5, SR13, SR8, SR16)</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -328,13 +335,14 @@
         "SR16. 暮らしの中で何度も楽しい体験ができる様な状況を、自分でつくり出すことができる"
     ];
 
+    // アンケート選択肢（1から6の順に変更）
     const options = [
-        { text: "6. とても 当てはまる", value: 6 },
-        { text: "5. かなり 当てはまる", value: 5 },
-        { text: "4. どちらかというと 当てはまる", value: 4 },
-        { text: "3. どちらかというと 当てはまらない", value: 3 },
+        { text: "1. まったく 当てはまらない", value: 1 },
         { text: "2. ほとんど 当てはまらない", value: 2 },
-        { text: "1. まったく 当てはまらない", value: 1 }
+        { text: "3. どちらかというと 当てはまらない", value: 3 },
+        { text: "4. どちらかというと 当てはまる", value: 4 },
+        { text: "5. かなり 当てはまる", value: 5 },
+        { text: "6. とても 当てはまる", value: 6 }
     ];
 
     const chart2Order = [1, 14, 15, 2, 7, 8, 16, 3, 6, 9, 12, 4, 13, 5, 10, 11];
@@ -435,7 +443,6 @@
         document.getElementById('average-score').innerText = avg;
         document.getElementById('answer-datetime').innerText = `回答日時：${showDateTime()}`;
 
-        // Canvasを表示状態にリセット
         document.getElementById('radarChart1').style.display = 'block';
         document.getElementById('radarChart2').style.display = 'block';
         document.getElementById('radarChart3').style.display = 'block';
@@ -578,71 +585,59 @@
                 animation: false,
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { r: gridScaleOptions }
+                scales: { r: chart3ScaleOptions }
             }
         });
 
         document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // PDFダウンロード生成
-    
-async function downloadResultPDF() {
+    // PDFダウンロード生成（各チャートブロックを跨がないように最適化）
+    async function downloadResultPDF() {
+        const btn = document.getElementById('btn-pdf');
+        btn.disabled = true;
+        btn.innerText = 'PDF生成中...';
 
-    const btn = document.getElementById('btn-pdf');
-    btn.disabled = true;
-    btn.innerText = 'PDF生成中...';
+        try {
+            // クラス .pdf-page を持つ要素（3つの各ページブロック）を個別に取得
+            const pages = document.querySelectorAll('.pdf-page');
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = 210;
 
-    try {
+            await new Promise(resolve => setTimeout(resolve, 500));
 
-        const target = document.getElementById('pdf-content');
+            for (let i = 0; i < pages.length; i++) {
+                if (i > 0) {
+                    pdf.addPage(); // 2枚目以降は新しいページを追加
+                }
 
-        await new Promise(resolve => setTimeout(resolve, 800));
+                // ページ単位でキャプチャ
+                const canvas = await html2canvas(pages[i], {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
 
-        const canvas = await html2canvas(target, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false
-        });
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const imgWidth = pageWidth;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
 
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                // 各ブロックをA4の最上部（位置0）から描画し、改ページ位置を制御
+                pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+            }
 
-        const { jsPDF } = window.jspdf;
+            pdf.save('心理評価テスト_診断結果.pdf');
 
-        const pdf = new jsPDF('p', 'mm', 'a4');
-
-        const pageWidth = 210;
-        const pageHeight = 297;
-
-        const imgWidth = pageWidth;
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-
-        heightLeft -= pageHeight;
-
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
+        } catch (error) {
+            console.error(error);
+            alert('PDF生成に失敗しました');
+        } finally {
+            btn.disabled = false;
+            btn.innerText = '診断結果PDFをダウンロード';
         }
-
-        pdf.save('心理評価テスト_診断結果.pdf');
-
-    } catch (error) {
-        console.error(error);
-        alert('PDF生成に失敗しました');
-    } finally {
-        btn.disabled = false;
-        btn.innerText = '診断結果PDFをダウンロード';
     }
-}
-
 </script>
 
 </body>

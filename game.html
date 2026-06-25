@@ -1,269 +1,387 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💩クソ高校生によるクソ共へのクソゲームX</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { 
-            font-family: sans-serif; 
-            text-align: center; 
-            background: #eef2f3; 
-            margin: 0; 
-            padding: 20px;
-            min-height: 100vh;
-        }
-        h1 { 
-            color: #333; 
-            font-size: 28px; 
-            margin-bottom: 10px;
-        }
-        .info-bar {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 15px 0;
-            font-size: 18px;
-            color: #333;
-            flex-wrap: wrap;
-        }
-        .stat {
-            background: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            max-width: 400px;
-            gap: 10px; 
-            margin: 20px auto;
-            justify-content: center;
-        }
-        .card { 
-            width: 80px; 
-            height: 110px; 
-            background: #2c3e50; 
-            color: white; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 32px; 
-            cursor: pointer; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            border: 2px solid #2c3e50;
-        }
-        .card:hover:not(.matched):not(.flipped) {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-        .card.flipped { 
-            background: white; 
-            color: black; 
-            transform: rotateY(180deg);
-        }
-        .card.matched {
-            background: #27ae60;
-            color: white;
-            cursor: default;
-            font-size: 28px;
-        }
-        .buttons {
-            margin-top: 30px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-        button:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-        button:active {
-            transform: translateY(0);
-        }
-        .reset-btn {
-            background: #e74c3c;
-        }
-        .reset-btn:hover {
-            background: #c0392b;
-        }
-        .message {
-            margin-top: 20px;
-            font-size: 20px;
-            color: #27ae60;
-            font-weight: bold;
-            min-height: 30px;
-        }
-        @media (max-width: 480px) {
-            h1 { font-size: 20px; }
-            .grid { max-width: 360px; }
-            .card { width: 70px; height: 100px; font-size: 28px; }
-            .info-bar { gap: 15px; font-size: 16px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💩クソ高校生によるクソ共へのクソゲームX</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: sans-serif;
+    text-align: center;
+    background: #eef2f3;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+h1 {
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.info-bar {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 15px 0;
+    font-size: 18px;
+    color: #333;
+    flex-wrap: wrap;
+}
+
+.stat {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    max-width: 400px;
+    gap: 10px;
+    margin: 20px auto;
+    justify-content: center;
+}
+
+.card {
+    width: 80px;
+    height: 110px;
+    background: #2c3e50;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    border: 2px solid #2c3e50;
+}
+
+.card:hover:not(.matched):not(.flipped) {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.card.flipped {
+    background: white;
+    color: black;
+    transform: rotateY(180deg);
+}
+
+.card.matched {
+    background: #27ae60;
+    color: white;
+    cursor: default;
+    font-size: 28px;
+}
+
+.buttons {
+    margin-top: 30px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 12px 24px;
+    font-size: 16px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.reset-btn {
+    background: #e74c3c;
+}
+
+.reset-btn:hover {
+    background: #c0392b;
+}
+
+.message {
+    margin-top: 20px;
+    font-size: 20px;
+    color: #27ae60;
+    font-weight: bold;
+    min-height: 30px;
+}
+
+.message.rank {
+    font-size: 42px;
+    font-weight: 900;
+    padding: 20px;
+    margin-top: 25px;
+    border-radius: 15px;
+    background: linear-gradient(135deg,#ffe066,#ffb703);
+    color: #d62828;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    border: 4px solid #ff6b00;
+    animation: pop 0.6s ease;
+    line-height: 1.5;
+}
+
+@keyframes pop {
+    0% { transform: scale(0.5); }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 20px; }
+    .grid { max-width: 360px; }
+    .card { width: 70px; height: 100px; font-size: 28px; }
+    .info-bar { gap: 15px; font-size: 16px; }
+
+    .message.rank {
+        font-size: 28px;
+    }
+}
+</style>
+
 </head>
+
 <body>
 
-    <h1>💩クソ高校生によるクソ共へのクソゲーム💩</h1>
-    
-    <div class="info-bar">
-        <div class="stat">⏱️ 時間: <span id="timer">0:00</span></div>
-        <div class="stat">移動: <span id="moves">0</span></div>
-        <div class="stat">ペア: <span id="pairs">0</span>/<span id="total">8</span></div>
-    </div>
+<h1>💩クソ高校生によるクソ共へのクソゲーム💩</h1>
 
-    <div class="grid" id="grid"></div>
-    <div class="message" id="message"></div>
-    
-    <div class="buttons">
-        <button id="resetBtn" class="reset-btn">リセット</button>
-    </div>
+<div class="info-bar">
+    <div class="stat">⏱️ 時間: <span id="timer">0:00</span></div>
+    <div class="stat">移動: <span id="moves">0</span></div>
+    <div class="stat">ペア: <span id="pairs">0</span>/<span id="total">8</span></div>
+</div>
 
-    <script>
-        const icons = ['💩', '💩💩', '💩💩💩', '💩💩💩💩', '糞人', '糞大', '糞中', '❤️💩'];
-        
-        let gameState = {
-            deck: [],
-            flippedCards: [],
-            matchedPairs: 0,
-            moves: 0,
-            isChecking: false,
-            gameWon: false,
-            startTime: null,
-            timerInterval: null,
-            elapsedSeconds: 0
-        };
+<div class="grid" id="grid"></div>
 
-        const grid = document.getElementById('grid');
-        const movesDisplay = document.getElementById('moves');
-        const pairsDisplay = document.getElementById('pairs');
-        const totalDisplay = document.getElementById('total');
-        const messageDisplay = document.getElementById('message');
-        const resetBtn = document.getElementById('resetBtn');
-        const timerDisplay = document.getElementById('timer');
+<div class="message" id="message"></div>
 
-        totalDisplay.textContent = icons.length;
+<div class="buttons">
+    <button id="resetBtn" class="reset-btn">リセット</button>
+</div>
 
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
+<script>
+const icons = [
+    '💩',
+    '💩💩',
+    '💩💩💩',
+    '💩💩💩💩',
+    '糞人',
+    '糞大',
+    '糞中',
+    '❤️💩'
+];
 
-        function startTimer() {
-            gameState.startTime = Date.now();
-            gameState.timerInterval = setInterval(() => {
-                gameState.elapsedSeconds = Math.floor((Date.now() - gameState.startTime) / 1000);
-                timerDisplay.textContent = formatTime(gameState.elapsedSeconds);
-            }, 100);
-        }
+let gameState = {
+    deck: [],
+    flippedCards: [],
+    matchedPairs: 0,
+    moves: 0,
+    isChecking: false,
+    gameWon: false,
+    startTime: null,
+    timerInterval: null,
+    elapsedSeconds: 0
+};
 
-        function stopTimer() {
-            if (gameState.timerInterval) {
-                clearInterval(gameState.timerInterval);
-                gameState.timerInterval = null;
-            }
-        }
+const grid = document.getElementById('grid');
+const movesDisplay = document.getElementById('moves');
+const pairsDisplay = document.getElementById('pairs');
+const totalDisplay = document.getElementById('total');
+const messageDisplay = document.getElementById('message');
+const resetBtn = document.getElementById('resetBtn');
+const timerDisplay = document.getElementById('timer');
 
-        function initGame() {
+totalDisplay.textContent = icons.length;
+
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function startTimer() {
+    gameState.startTime = Date.now();
+
+    gameState.timerInterval = setInterval(() => {
+        gameState.elapsedSeconds =
+            Math.floor((Date.now() - gameState.startTime) / 1000);
+
+        timerDisplay.textContent =
+            formatTime(gameState.elapsedSeconds);
+    }, 100);
+}
+
+function stopTimer() {
+    if (gameState.timerInterval) {
+        clearInterval(gameState.timerInterval);
+        gameState.timerInterval = null;
+    }
+}
+
+function initGame() {
+
+    stopTimer();
+
+    gameState.deck = [...icons, ...icons];
+    gameState.deck.sort(() => Math.random() - 0.5);
+
+    gameState.flippedCards = [];
+    gameState.matchedPairs = 0;
+    gameState.moves = 0;
+    gameState.isChecking = false;
+    gameState.gameWon = false;
+    gameState.elapsedSeconds = 0;
+    gameState.startTime = null;
+
+    grid.innerHTML = '';
+
+    messageDisplay.textContent = '';
+    messageDisplay.classList.remove('rank');
+
+    movesDisplay.textContent = '0';
+    pairsDisplay.textContent = '0';
+    timerDisplay.textContent = '0:00';
+
+    gameState.deck.forEach(icon => {
+
+        const card = document.createElement('div');
+
+        card.classList.add('card');
+        card.dataset.value = icon;
+        card.textContent = '？';
+
+        card.addEventListener('click', () => {
+            handleCardClick(card);
+        });
+
+        grid.appendChild(card);
+    });
+}
+
+function handleCardClick(card) {
+
+    if (
+        gameState.isChecking ||
+        gameState.gameWon ||
+        gameState.flippedCards.length >= 2 ||
+        card.classList.contains('flipped') ||
+        card.classList.contains('matched')
+    ) {
+        return;
+    }
+
+    if (
+        gameState.flippedCards.length === 0 &&
+        !gameState.startTime
+    ) {
+        startTimer();
+    }
+
+    card.classList.add('flipped');
+    card.textContent = card.dataset.value;
+
+    gameState.flippedCards.push(card);
+
+    if (gameState.flippedCards.length === 2) {
+
+        gameState.isChecking = true;
+        gameState.moves++;
+
+        movesDisplay.textContent = gameState.moves;
+
+        setTimeout(checkMatch, 800);
+    }
+}
+
+function checkMatch() {
+
+    const [card1, card2] = gameState.flippedCards;
+
+    if (card1.dataset.value === card2.dataset.value) {
+
+        card1.classList.add('matched');
+        card2.classList.add('matched');
+
+        card1.classList.remove('flipped');
+        card2.classList.remove('flipped');
+
+        gameState.matchedPairs++;
+
+        pairsDisplay.textContent =
+            gameState.matchedPairs;
+
+        if (gameState.matchedPairs === icons.length) {
+
+            gameState.gameWon = true;
+
             stopTimer();
-            gameState.deck = [...icons, ...icons];
-            gameState.deck.sort(() => Math.random() - 0.5);
-            gameState.flippedCards = [];
-            gameState.matchedPairs = 0;
-            gameState.moves = 0;
-            gameState.isChecking = false;
-            gameState.gameWon = false;
-            gameState.elapsedSeconds = 0;
-            gameState.startTime = null;
-            grid.innerHTML = '';
-            messageDisplay.textContent = '';
-            movesDisplay.textContent = '0';
-            pairsDisplay.textContent = '0';
-            timerDisplay.textContent = '0:00';
 
-            gameState.deck.forEach((icon) => {
-                const card = document.createElement('div');
-                card.classList.add('card');
-                card.dataset.value = icon;
-                card.textContent = '？';
+            let rankMessage = '';
 
-                card.addEventListener('click', () => {
-                    handleCardClick(card);
-                });
-                grid.appendChild(card);
-            });
-        }
-
-        function handleCardClick(card) {
-            if (gameState.isChecking || gameState.gameWon || gameState.flippedCards.length >= 2 || card.classList.contains('flipped') || card.classList.contains('matched')) {
-                return;
-            }
-            
-            // タイマー開始（最初のカリックの時）
-            if (gameState.flippedCards.length === 0 && !gameState.startTime) {
-                startTimer();
-            }
-            
-            card.classList.add('flipped');
-            card.textContent = card.dataset.value;
-            gameState.flippedCards.push(card);
-
-            if (gameState.flippedCards.length === 2) {
-                gameState.isChecking = true;
-                gameState.moves++;
-                movesDisplay.textContent = gameState.moves;
-                setTimeout(checkMatch, 800);
-            }
-        }
-
-        function checkMatch() {
-            const [card1, card2] = gameState.flippedCards;
-            
-            if (card1.dataset.value === card2.dataset.value) {
-                card1.classList.add('matched');
-                card2.classList.add('matched');
-                card1.classList.remove('flipped');
-                card2.classList.remove('flipped');
-                gameState.matchedPairs++;
-                pairsDisplay.textContent = gameState.matchedPairs;
-                
-                if (gameState.matchedPairs === icons.length) {
-                    gameState.gameWon = true;
-                    stopTimer();
-                    messageDisplay.textContent = `🎉 ゲーム終了！${formatTime(gameState.elapsedSeconds)}でクリア！${gameState.moves}回の移動`;
-                }
+            if (gameState.elapsedSeconds <= 20) {
+                rankMessage = 'あなたは💩マスターです！';
+            } else if (gameState.elapsedSeconds <= 30) {
+                rankMessage = 'あなたはフツーの💩高校生です';
+            } else if (gameState.elapsedSeconds <= 40) {
+                rankMessage = 'あなたはダメ💩中学生です';
+            } else if (gameState.elapsedSeconds <= 50) {
+                rankMessage = 'あなたはアホ💩小学生です';
             } else {
-                card1.classList.remove('flipped');
-                card2.classList.remove('flipped');
-                card1.textContent = '？';
-                card2.textContent = '？';
+                rankMessage = 'あなたは💩幼稚園生からやり直せ';
             }
-            
-            gameState.flippedCards = [];
-            gameState.isChecking = false;
+
+            messageDisplay.classList.add('rank');
+
+            messageDisplay.innerHTML = `
+                🎉 ゲーム終了！<br>
+                ⏱️ ${formatTime(gameState.elapsedSeconds)}でクリア！<br>
+                🔄 ${gameState.moves}回の移動<br><br>
+                ${rankMessage}
+            `;
         }
 
-        resetBtn.addEventListener('click', initGame);
+    } else {
 
-        initGame();
-    </script>
+        card1.classList.remove('flipped');
+        card2.classList.remove('flipped');
+
+        card1.textContent = '？';
+        card2.textContent = '？';
+    }
+
+    gameState.flippedCards = [];
+    gameState.isChecking = false;
+}
+
+resetBtn.addEventListener('click', initGame);
+
+initGame();
+</script>
+
 </body>
 </html>

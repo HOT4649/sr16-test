@@ -45,8 +45,8 @@ h1 {
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    max-width: 400px;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 280px;
     gap: 10px;
     margin: 20px auto;
     justify-content: center;
@@ -173,7 +173,7 @@ button:active {
 <div class="info-bar">
     <div class="stat">⏱️ 時間: <span id="timer">0:00</span></div>
     <div class="stat">移動: <span id="moves">0</span></div>
-    <div class="stat">ペア: <span id="pairs">0</span>/<span id="total">8</span></div>
+    <div class="stat">ペア: <span id="pairs">0</span>/<span id="total">6</span></div>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -191,8 +191,6 @@ const icons = [
     '💩💩💩',
     '💩💩💩💩',
     '糞人',
-    '糞大',
-    '糞中',
     '❤️💩'
 ];
 

@@ -5,57 +5,228 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💩クソ高校生によるクソ共へのクソゲームX</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #eef2f3; margin: 0; padding: 20px; }
-        h1 { color: #333; font-size: 24px; }
-        .grid { display: grid; grid-template-columns: repeat(4, 80px); gap: 10px; justify-content: center; margin-top: 20px; }
-        .card { width: 80px; height: 110px; background: #2c3e50; color: white; display: flex; align-items: center; justify-content: center; font-size: 32px; cursor: pointer; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); user-select: none; }
-        .card.flipped { background: white; color: black; transform: rotateY(180deg); transition: transform 0.3s; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: sans-serif; 
+            text-align: center; 
+            background: #eef2f3; 
+            margin: 0; 
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 { 
+            color: #333; 
+            font-size: 28px; 
+            margin-bottom: 10px;
+        }
+        .info-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 15px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .stat {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            max-width: 400px;
+            gap: 10px; 
+            margin: 20px auto;
+            justify-content: center;
+        }
+        .card { 
+            width: 80px; 
+            height: 110px; 
+            background: #2c3e50; 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 32px; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            border: 2px solid #2c3e50;
+        }
+        .card:hover:not(.matched):not(.flipped) {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        .card.flipped { 
+            background: white; 
+            color: black; 
+            transform: rotateY(180deg);
+        }
+        .card.matched {
+            background: #27ae60;
+            color: white;
+            cursor: default;
+            font-size: 28px;
+        }
+        .buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .reset-btn {
+            background: #e74c3c;
+        }
+        .reset-btn:hover {
+            background: #c0392b;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #27ae60;
+            font-weight: bold;
+            min-height: 30px;
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 20px; }
+            .grid { max-width: 360px; }
+            .card { width: 70px; height: 100px; font-size: 28px; }
+            .info-bar { gap: 15px; font-size: 16px; }
+        }
     </style>
 </head>
 <body>
 
     <h1>💩クソ高校生によるクソ共へのクソゲーム💩</h1>
+    
+    <div class="info-bar">
+        <div class="stat">移動: <span id="moves">0</span></div>
+        <div class="stat">ペア: <span id="pairs">0</span>/<span id="total">8</span></div>
+    </div>
+
     <div class="grid" id="grid"></div>
+    <div class="message" id="message"></div>
+    
+    <div class="buttons">
+        <button id="resetBtn" class="reset-btn">リセット</button>
+    </div>
 
     <script>
         const icons = ['💩', '💩💩', '💩💩💩', '💩💩💩💩', '💩💩💩💩💩', '💩💩💩💩💩💩', '💩💩💩💩💩💩💩', '💩💩💩💩💩💩💩💩'];
-        let deck = [...icons, ...icons];
-        deck.sort(() => Math.random() - 0.5);
+        
+        let gameState = {
+            deck: [],
+            flippedCards: [],
+            matchedPairs: 0,
+            moves: 0,
+            isChecking: false,
+            gameWon: false
+        };
 
         const grid = document.getElementById('grid');
-        let flippedCards = [];
+        const movesDisplay = document.getElementById('moves');
+        const pairsDisplay = document.getElementById('pairs');
+        const totalDisplay = document.getElementById('total');
+        const messageDisplay = document.getElementById('message');
+        const resetBtn = document.getElementById('resetBtn');
 
-        deck.forEach((icon) => {
-            const card = document.createElement('div');
-            card.classList.add('card');
-            card.dataset.value = icon;
-            card.textContent = '？';
+        totalDisplay.textContent = icons.length;
 
-            card.addEventListener('click', () => {
-                if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
-                    card.classList.add('flipped');
-                    card.textContent = card.dataset.value;
-                    flippedCards.push(card);
+        function initGame() {
+            gameState.deck = [...icons, ...icons];
+            gameState.deck.sort(() => Math.random() - 0.5);
+            gameState.flippedCards = [];
+            gameState.matchedPairs = 0;
+            gameState.moves = 0;
+            gameState.isChecking = false;
+            gameState.gameWon = false;
+            grid.innerHTML = '';
+            messageDisplay.textContent = '';
+            movesDisplay.textContent = '0';
+            pairsDisplay.textContent = '0';
 
-                    if (flippedCards.length === 2) {
-                        setTimeout(checkMatch, 800);
-                    }
-                }
-            });
-            grid.appendChild(card);
-        });
+            gameState.deck.forEach((icon) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.value = icon;
+                card.textContent = '？';
 
-        function checkMatch() {
-            if (flippedCards[0].dataset.value === flippedCards[1].dataset.value) {
-                flippedCards = [];
-            } else {
-                flippedCards.forEach(card => {
-                    card.classList.remove('flipped');
-                    card.textContent = '？';
+                card.addEventListener('click', () => {
+                    handleCardClick(card);
                 });
-                flippedCards = [];
+                grid.appendChild(card);
+            });
+        }
+
+        function handleCardClick(card) {
+            if (gameState.isChecking || gameState.gameWon || gameState.flippedCards.length >= 2 || card.classList.contains('flipped') || card.classList.contains('matched')) {
+                return;
+            }
+            
+            card.classList.add('flipped');
+            card.textContent = card.dataset.value;
+            gameState.flippedCards.push(card);
+
+            if (gameState.flippedCards.length === 2) {
+                gameState.isChecking = true;
+                gameState.moves++;
+                movesDisplay.textContent = gameState.moves;
+                setTimeout(checkMatch, 800);
             }
         }
+
+        function checkMatch() {
+            const [card1, card2] = gameState.flippedCards;
+            
+            if (card1.dataset.value === card2.dataset.value) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                gameState.matchedPairs++;
+                pairsDisplay.textContent = gameState.matchedPairs;
+                
+                if (gameState.matchedPairs === icons.length) {
+                    gameState.gameWon = true;
+                    messageDisplay.textContent = `🎉 ゲーム終了！${gameState.moves}回の移動でクリア！`;
+                }
+            } else {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                card1.textContent = '？';
+                card2.textContent = '？';
+            }
+            
+            gameState.flippedCards = [];
+            gameState.isChecking = false;
+        }
+
+        resetBtn.addEventListener('click', initGame);
+
+        initGame();
     </script>
 </body>
 </html>

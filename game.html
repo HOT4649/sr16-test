@@ -26,6 +26,7 @@
             margin: 15px 0;
             font-size: 18px;
             color: #333;
+            flex-wrap: wrap;
         }
         .stat {
             background: white;
@@ -123,6 +124,7 @@
     <h1>💩クソ高校生によるクソ共へのクソゲーム💩</h1>
     
     <div class="info-bar">
+        <div class="stat">⏱️ 時間: <span id="timer">0:00</span></div>
         <div class="stat">移動: <span id="moves">0</span></div>
         <div class="stat">ペア: <span id="pairs">0</span>/<span id="total">8</span></div>
     </div>
@@ -143,7 +145,10 @@
             matchedPairs: 0,
             moves: 0,
             isChecking: false,
-            gameWon: false
+            gameWon: false,
+            startTime: null,
+            timerInterval: null,
+            elapsedSeconds: 0
         };
 
         const grid = document.getElementById('grid');
@@ -152,10 +157,33 @@
         const totalDisplay = document.getElementById('total');
         const messageDisplay = document.getElementById('message');
         const resetBtn = document.getElementById('resetBtn');
+        const timerDisplay = document.getElementById('timer');
 
         totalDisplay.textContent = icons.length;
 
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            gameState.startTime = Date.now();
+            gameState.timerInterval = setInterval(() => {
+                gameState.elapsedSeconds = Math.floor((Date.now() - gameState.startTime) / 1000);
+                timerDisplay.textContent = formatTime(gameState.elapsedSeconds);
+            }, 100);
+        }
+
+        function stopTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+        }
+
         function initGame() {
+            stopTimer();
             gameState.deck = [...icons, ...icons];
             gameState.deck.sort(() => Math.random() - 0.5);
             gameState.flippedCards = [];
@@ -163,10 +191,13 @@
             gameState.moves = 0;
             gameState.isChecking = false;
             gameState.gameWon = false;
+            gameState.elapsedSeconds = 0;
+            gameState.startTime = null;
             grid.innerHTML = '';
             messageDisplay.textContent = '';
             movesDisplay.textContent = '0';
             pairsDisplay.textContent = '0';
+            timerDisplay.textContent = '0:00';
 
             gameState.deck.forEach((icon) => {
                 const card = document.createElement('div');
@@ -184,6 +215,11 @@
         function handleCardClick(card) {
             if (gameState.isChecking || gameState.gameWon || gameState.flippedCards.length >= 2 || card.classList.contains('flipped') || card.classList.contains('matched')) {
                 return;
+            }
+            
+            // タイマー開始（最初のカリックの時）
+            if (gameState.flippedCards.length === 0 && !gameState.startTime) {
+                startTimer();
             }
             
             card.classList.add('flipped');
@@ -211,7 +247,8 @@
                 
                 if (gameState.matchedPairs === icons.length) {
                     gameState.gameWon = true;
-                    messageDisplay.textContent = `🎉 ゲーム終了！${gameState.moves}回の移動でクリア！`;
+                    stopTimer();
+                    messageDisplay.textContent = `🎉 ゲーム終了！${formatTime(gameState.elapsedSeconds)}でクリア！${gameState.moves}回の移動`;
                 }
             } else {
                 card1.classList.remove('flipped');

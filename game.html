@@ -344,15 +344,15 @@ function checkMatch() {
             let rankMessage = '';
 
             if (gameState.elapsedSeconds <= 20) {
-                rankMessage = 'あなたは💩マスターです！';
+                rankMessage = '高速すぎる！あなたは💩マスターです！';
             } else if (gameState.elapsedSeconds <= 30) {
-                rankMessage = 'あなたはフツーの💩高校生です';
+                rankMessage = 'ほー😯あなたはフツーの💩高校生です';
             } else if (gameState.elapsedSeconds <= 40) {
-                rankMessage = 'あなたはダメ💩中学生です';
+                rankMessage = 'おそ！あなたはダメ💩中学生です';
             } else if (gameState.elapsedSeconds <= 50) {
-                rankMessage = 'あなたはアホ💩小学生です';
+                rankMessage = '亀かよ！あなたはアホ💩小学生です';
             } else {
-                rankMessage = 'あなたは💩幼稚園生からやり直せ';
+                rankMessage = '🐌かよ！あなたは💩幼稚園生からやり直せ';
             }
 
             messageDisplay.classList.add('rank');
